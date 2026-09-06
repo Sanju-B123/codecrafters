@@ -50,22 +50,22 @@ export const ConsumerDashboardPage = () => {
       {/* Consumer Top Header */}
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-saffron-600 text-white flex items-center justify-center font-bold">
-                <ShieldCheck className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-saffron-600 text-white flex items-center justify-center font-bold">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="font-extrabold text-base tracking-tight">
-                BharatStandards <span className="text-saffron-600">Consumer Portal</span>
+              <span className="font-extrabold text-sm sm:text-base tracking-tight truncate">
+                BharatStandards <span className="text-saffron-600 hidden xs:inline">Consumer</span>
               </span>
             </Link>
-            <Badge variant="saffron" size="sm">
+            <Badge variant="saffron" size="sm" className="hidden sm:inline-flex">
               CONSUMER TRACK
             </Badge>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <div className="text-right hidden md:block">
               <div className="text-xs font-bold text-slate-900 dark:text-white">
                 {user?.name || 'Citizen User'}
               </div>
@@ -79,21 +79,22 @@ export const ConsumerDashboardPage = () => {
               onClick={handleLogout}
               startIcon={<LogOut className="w-3.5 h-3.5 text-slate-500" />}
             >
-              Sign Out
+              <span className="hidden sm:inline">Sign Out</span>
+              <span className="sm:hidden">Exit</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8 text-left">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8 text-left">
         {/* Welcome Banner */}
-        <div className="rounded-2xl bg-gradient-to-r from-bharat-950 via-bharat-900 to-slate-900 text-white p-6 sm:p-8 shadow-md relative overflow-hidden">
+        <div className="rounded-2xl bg-gradient-to-r from-bharat-950 via-bharat-900 to-slate-900 text-white p-5 sm:p-8 shadow-md relative overflow-hidden">
           <div className="relative z-10 space-y-2 max-w-2xl">
             <Badge variant="primary" size="sm">
               CITIZEN SAFETY & STANDARDS
             </Badge>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight">
               Welcome, {user?.name || 'Citizen'}!
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
@@ -108,8 +109,8 @@ export const ConsumerDashboardPage = () => {
             <Card className="h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="w-5 h-5 text-bharat-600 dark:text-bharat-400" />
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Search className="w-4 h-4 sm:w-5 sm:h-5 text-bharat-600 dark:text-bharat-400 flex-shrink-0" />
                     <span>Verify ISI / CM/L License Number</span>
                   </CardTitle>
                   <Badge variant="neutral" size="sm">
@@ -121,15 +122,15 @@ export const ConsumerDashboardPage = () => {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <form onSubmit={handleVerifyMark} className="flex gap-2">
+                <form onSubmit={handleVerifyMark} className="flex flex-col sm:flex-row gap-2.5">
                   <input
                     type="text"
                     value={cmNumber}
                     onChange={(e) => setCmNumber(e.target.value)}
                     placeholder="e.g. CM/L-8402914 or 8402914"
-                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-bharat-500"
+                    className="flex-1 px-3 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-bharat-500 min-h-11"
                   />
-                  <Button type="submit" variant="primary" size="md">
+                  <Button type="submit" variant="primary" size="md" className="min-h-11 justify-center">
                     Verify Mark
                   </Button>
                 </form>

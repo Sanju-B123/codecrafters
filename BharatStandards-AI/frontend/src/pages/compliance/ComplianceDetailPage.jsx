@@ -1633,8 +1633,8 @@ export const ComplianceDetailPage = () => {
               <span className="font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] tracking-wider block">
                 Factor Contribution Breakdown
               </span>
-              <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-                <table className="w-full text-left text-xs">
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                <table className="w-full text-left text-xs min-w-[320px]">
                   <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] uppercase tracking-wider font-bold">
                     <tr>
                       <th className="py-2.5 px-3">Factor Type</th>

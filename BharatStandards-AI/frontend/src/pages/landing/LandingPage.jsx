@@ -55,7 +55,7 @@ export const LandingPage = () => {
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.12]">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.12]">
                 Understand Indian Standards.{' '}
                 <span className="block mt-1 text-bharat-900 dark:text-bharat-400">
                   Navigate BIS with confidence.
@@ -63,27 +63,27 @@ export const LandingPage = () => {
               </h1>
 
               {/* Description */}
-              <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-normal max-w-2xl">
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal max-w-2xl">
                 An intelligent assistant for industries and consumers to discover applicable standards, understand requirements, assess document readiness and navigate BIS-related services.
               </p>
 
               {/* Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-4">
-                <Link to="/products">
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Link to="/products" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     variant="primary"
-                    className="shadow-md hover:shadow-lg gap-2 text-sm bg-bharat-900 hover:bg-bharat-800 dark:bg-bharat-600 dark:hover:bg-bharat-500"
+                    className="w-full sm:w-auto min-h-12 shadow-md hover:shadow-lg gap-2 text-sm bg-bharat-900 hover:bg-bharat-800 dark:bg-bharat-600 dark:hover:bg-bharat-500 justify-center"
                     endIcon={<ArrowRight className="w-4 h-4" />}
                   >
                     Check My Product
                   </Button>
                 </Link>
-                <Link to="/standards">
+                <Link to="/standards" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="gap-2 text-sm border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="w-full sm:w-auto min-h-12 gap-2 text-sm border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 justify-center"
                     startIcon={<Search className="w-4 h-4 text-slate-500" />}
                   >
                     Explore Standards
@@ -92,7 +92,7 @@ export const LandingPage = () => {
               </div>
 
               {/* Trust Indicators */}
-              <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3 sm:gap-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -116,12 +116,12 @@ export const LandingPage = () => {
 
             {/* Right Column: Hero Visual Card (Real Product UI Visualization) */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xl p-6 sm:p-7 overflow-hidden text-left">
+              <div className="relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xl p-4 sm:p-7 overflow-hidden text-left">
                 {/* Synthetic Demo Label */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80">
+                <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800/80">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                       Product Analysis
                     </span>
                   </div>
@@ -131,9 +131,9 @@ export const LandingPage = () => {
                 </div>
 
                 {/* Target Product Info */}
-                <div className="mt-5 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                <div className="mt-4 space-y-1">
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                       {DEMO_WATER_HEATER_STATS.productName}
                     </h3>
                     <StatusBadge status="HIGH" size="sm" label="HIGH RELEVANCE" />
@@ -148,18 +148,18 @@ export const LandingPage = () => {
                 </div>
 
                 {/* Compliance Readiness Gauge / Widget */}
-                <div className="mt-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80">
+                <div className="mt-4 p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Compliance Readiness
                       </span>
-                      <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                         {DEMO_WATER_HEATER_STATS.readinessScore}%
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
                         Evaluation Status
                       </span>
                       <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
@@ -182,28 +182,28 @@ export const LandingPage = () => {
                 </div>
 
                 {/* 3 Metrics: PASS, PARTIAL, MISSING */}
-                <div className="mt-4 grid grid-cols-3 gap-2.5 text-center">
-                  <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-                    <div className="text-lg font-black text-emerald-700 dark:text-emerald-400">
+                <div className="mt-3.5 grid grid-cols-3 gap-2 sm:gap-2.5 text-center">
+                  <div className="p-2.5 sm:p-3 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                    <div className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400">
                       {DEMO_WATER_HEATER_STATS.passCount}
                     </div>
-                    <div className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase flex items-center justify-center gap-1">
+                    <div className="text-[10px] sm:text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase flex items-center justify-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> PASS
                     </div>
                   </div>
-                  <div className="p-3 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg">
-                    <div className="text-lg font-black text-amber-700 dark:text-amber-400">
+                  <div className="p-2.5 sm:p-3 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <div className="text-base sm:text-lg font-black text-amber-700 dark:text-amber-400">
                       {DEMO_WATER_HEATER_STATS.partialCount}
                     </div>
-                    <div className="text-[11px] font-bold text-amber-800 dark:text-amber-300 uppercase flex items-center justify-center gap-1">
+                    <div className="text-[10px] sm:text-[11px] font-bold text-amber-800 dark:text-amber-300 uppercase flex items-center justify-center gap-1">
                       <AlertTriangle className="w-3 h-3" /> PARTIAL
                     </div>
                   </div>
-                  <div className="p-3 bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-lg">
-                    <div className="text-lg font-black text-rose-700 dark:text-rose-400">
+                  <div className="p-2.5 sm:p-3 bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-lg">
+                    <div className="text-base sm:text-lg font-black text-rose-700 dark:text-rose-400">
                       {DEMO_WATER_HEATER_STATS.missingCount}
                     </div>
-                    <div className="text-[11px] font-bold text-rose-800 dark:text-rose-300 uppercase flex items-center justify-center gap-1">
+                    <div className="text-[10px] sm:text-[11px] font-bold text-rose-800 dark:text-rose-300 uppercase flex items-center justify-center gap-1">
                       <XCircle className="w-3 h-3" /> MISSING
                     </div>
                   </div>
@@ -397,7 +397,7 @@ export const LandingPage = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {[
             {
               step: '01',

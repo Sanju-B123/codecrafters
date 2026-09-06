@@ -263,20 +263,20 @@ export const DashboardLayout = () => {
         {/* Top Header */}
         <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm text-left">
           {/* Left: Mobile hamburger & Page Title */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
               aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 {getPageTitle(location.pathname)}
               </h1>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block truncate">
                 BharatStandards AI • Verified BIS Conformance Assistant
               </p>
             </div>
@@ -440,7 +440,18 @@ export const DashboardLayout = () => {
           </div>
 
           {/* Right: Notifications, User Avatar & Name */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+            {/* Mobile Search Toggle */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen((prev) => !prev)}
+              className="md:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Search"
+              aria-label="Toggle search"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+
             {/* Notifications with Dropdown */}
             <div className="relative" ref={notifRef}>
               <button
@@ -459,7 +470,7 @@ export const DashboardLayout = () => {
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3 z-50 text-left animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3 z-50 text-left animate-in fade-in zoom-in-95 duration-150">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -633,7 +644,7 @@ export const DashboardLayout = () => {
         </div>
 
         {/* Dynamic Main Workspace Container */}
-        <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 lg:pb-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
       </div>
@@ -641,7 +652,7 @@ export const DashboardLayout = () => {
       {/* 4. Mobile Bottom Navigation Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 z-40 flex items-center justify-around px-2"
+        className="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 z-40 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]"
       >
         <NavLink
           to="/dashboard"
