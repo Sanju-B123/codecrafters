@@ -17,6 +17,8 @@ from app.api.deps import get_current_user, security_scheme
 from app.core.security import decode_access_token
 from app.services.audit_service import audit_service
 from app.services.notification_service import notification_service
+from app.core.mongodb import get_mongo_db
+from app.core.logging import logger
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -77,6 +79,25 @@ def register(
     db.commit()
     db.refresh(user)
 
+    # Explicit MongoDB collection persistence
+    try:
+        mongo_db = get_mongo_db()
+        mongo_user_doc = {
+            "_id": user.id,
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "password_hash": user.password_hash,
+            "role": user.role,
+            "status": getattr(user, "status", "ACTIVE"),
+            "is_active": user.is_active,
+            "created_at": user.created_at.isoformat() if hasattr(user, "created_at") and user.created_at else datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "_synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }
+        mongo_db["users"].replace_one({"_id": user.id}, mongo_user_doc, upsert=True)
+    except Exception as m_err:
+        logger.debug(f"Direct MongoDB sync during user registration deferred: {m_err}")
+
     # Log audit event and create welcome notification
     audit_service.log_event(
         db=db,
@@ -124,9 +145,33 @@ def login(
     """
     Authenticate with email and password.
     Returns JWT access token and user information.
+    Checks SQL primary store and MongoDB replica layer.
     """
     email = request.email.lower().strip()
     user = db.query(User).filter(User.email == email).first()
+
+    # Fallback to MongoDB persistence layer if user record was created directly in MongoDB
+    if not user:
+        try:
+            mongo_db = get_mongo_db()
+            mongo_user = mongo_db["users"].find_one({"email": email})
+            if mongo_user and verify_password(request.password, mongo_user.get("password_hash", "")):
+                user = User(
+                    name=mongo_user.get("name", "User"),
+                    email=email,
+                    password_hash=mongo_user.get("password_hash"),
+                    role=mongo_user.get("role", "industry"),
+                    is_active=mongo_user.get("is_active", True),
+                )
+                db.add(user)
+                try:
+                    db.commit()
+                    db.refresh(user)
+                except Exception:
+                    db.rollback()
+                    user = db.query(User).filter(User.email == email).first()
+        except Exception as mongo_err:
+            logger.debug(f"MongoDB fallback lookup skipped: {mongo_err}")
 
     if not user or not verify_password(request.password, user.password_hash):
         raise HTTPException(

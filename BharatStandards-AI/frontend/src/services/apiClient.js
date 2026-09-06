@@ -8,7 +8,7 @@ const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '
 export const TOKEN_STORAGE_KEY = 'bharat_standards_token';
 export const USER_STORAGE_KEY = 'bharat_standards_user';
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
     this.status = status;
@@ -79,8 +79,8 @@ export const apiClient = async (endpoint, options = {}) => {
 
   // Parse JSON response or fallback to text
   let data;
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
     data = await response.json().catch(() => null);
   } else {
     data = await response.text().catch(() => null);
@@ -92,12 +92,26 @@ export const apiClient = async (endpoint, options = {}) => {
       clearStoredAuth();
     }
 
-    const errorMessage =
-      (data && typeof data === 'object' && (data.detail || data.message)) ||
-      (typeof data === 'string' && data) ||
-      `Request failed with status ${response.status}`;
+    let errorMessage;
+    if (typeof data === 'string' && (data.includes('<!DOCTYPE') || data.includes('<html') || data.includes('Page not found'))) {
+      if (response.status === 404) {
+        errorMessage = 'Backend API is currently offline or not deployed on this domain (HTTP 404).';
+      } else {
+        errorMessage = `Backend server returned HTTP ${response.status}.`;
+      }
+    } else {
+      errorMessage =
+        (data && typeof data === 'object' && (data.detail || data.message)) ||
+        (typeof data === 'string' && data) ||
+        `Request failed with status ${response.status}`;
+    }
 
     throw new ApiError(errorMessage, response.status, data);
+  }
+
+  // If status is OK (e.g. 200) but content is HTML (SPA catch-all), treat as backend missing
+  if (typeof data === 'string' && (data.includes('<!DOCTYPE') || data.includes('<html'))) {
+    throw new ApiError('Backend API endpoint returned static HTML instead of JSON.', 200, data);
   }
 
   return data;

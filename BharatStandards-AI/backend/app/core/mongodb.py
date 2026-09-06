@@ -7,17 +7,106 @@ Supports both live MongoDB instances (via pymongo and motor) and seamless in-mem
 import time
 import re
 from typing import Optional, Dict, Any, List
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
-import mongomock
-import mongomock_motor
-from motor.motor_asyncio import AsyncIOMotorClient
+import logging
+
+try:
+    from pymongo import MongoClient
+    from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+    HAVE_PYMONGO = True
+except ImportError:
+    MongoClient = None
+    ConnectionFailure = Exception
+    ServerSelectionTimeoutError = Exception
+    HAVE_PYMONGO = False
+
+try:
+    import mongomock
+    HAVE_MONGOMOCK = True
+except ImportError:
+    mongomock = None
+    HAVE_MONGOMOCK = False
+
+try:
+    from motor.motor_asyncio import AsyncIOMotorClient
+    HAVE_MOTOR = True
+except ImportError:
+    AsyncIOMotorClient = None
+    HAVE_MOTOR = False
+
+try:
+    import mongomock_motor
+    HAVE_MONGOMOCK_MOTOR = True
+except ImportError:
+    mongomock_motor = None
+    HAVE_MONGOMOCK_MOTOR = False
 
 from app.core.config import settings
 from app.core.logging import logger
-import logging
 
-logging.getLogger("pymongo").setLevel(logging.WARNING)
+if HAVE_PYMONGO:
+    logging.getLogger("pymongo").setLevel(logging.WARNING)
+
+# Built-in lightweight fallback in case neither pymongo nor mongomock is installed
+class _FallbackInMemoryCollection:
+    def __init__(self, name: str):
+        self.name = name
+        self._docs: Dict[Any, Dict[str, Any]] = {}
+
+    def replace_one(self, filter_dict: Dict[str, Any], doc: Dict[str, Any], upsert: bool = False):
+        doc_id = filter_dict.get("_id") or doc.get("_id")
+        self._docs[doc_id] = dict(doc)
+
+    def insert_one(self, doc: Dict[str, Any]):
+        doc_id = doc.get("_id") or str(len(self._docs) + 1)
+        doc["_id"] = doc_id
+        self._docs[doc_id] = dict(doc)
+
+    def find_one(self, filter_dict: Optional[Dict[str, Any]] = None):
+        if not filter_dict:
+            return next(iter(self._docs.values()), None)
+        for doc in self._docs.values():
+            if all(doc.get(k) == v for k, v in filter_dict.items()):
+                return dict(doc)
+        return None
+
+    def find(self, filter_dict: Optional[Dict[str, Any]] = None):
+        if not filter_dict:
+            return [dict(d) for d in self._docs.values()]
+        return [dict(d) for d in self._docs.values() if all(d.get(k) == v for k, v in filter_dict.items())]
+
+    def count_documents(self, filter_dict: Optional[Dict[str, Any]] = None):
+        return len(self.find(filter_dict))
+
+    def delete_one(self, filter_dict: Dict[str, Any]):
+        target = self.find_one(filter_dict)
+        if target and "_id" in target:
+            self._docs.pop(target["_id"], None)
+
+class _FallbackInMemoryDB:
+    def __init__(self, name: str = "bharat_standards"):
+        self.name = name
+        self._collections: Dict[str, _FallbackInMemoryCollection] = {}
+
+    def __getitem__(self, item: str):
+        if item not in self._collections:
+            self._collections[item] = _FallbackInMemoryCollection(item)
+        return self._collections[item]
+
+    def list_collection_names(self):
+        return list(self._collections.keys())
+
+class _FallbackInMemoryClient:
+    def __init__(self):
+        self._dbs: Dict[str, _FallbackInMemoryDB] = {}
+        self.admin = type("Admin", (), {"command": lambda *a, **k: {"ok": 1}})()
+
+    def __getitem__(self, item: str):
+        if item not in self._dbs:
+            self._dbs[item] = _FallbackInMemoryDB(item)
+        return self._dbs[item]
+
+    def close(self):
+        pass
 
 _sync_client: Optional[Any] = None
 _sync_db: Optional[Any] = None
@@ -46,13 +135,30 @@ def init_mongodb(force_mock: bool = False) -> Any:
 
     masked_url = _mask_mongo_url(settings.MONGODB_URL)
 
-    if force_mock or not settings.MONGODB_ENABLED:
-        logger.info("Initializing in-memory mongomock MongoDB instance...")
-        _sync_client = mongomock.MongoClient()
-        _sync_db = _sync_client[settings.MONGODB_DB_NAME]
-        _async_client = mongomock_motor.AsyncMongoMockClient()
-        _async_db = _async_client[settings.MONGODB_DB_NAME]
-        _is_mock = True
+    def _create_mock_clients():
+        nonlocal_mock = True
+        if HAVE_MONGOMOCK and mongomock is not None:
+            sync_cl = mongomock.MongoClient()
+            sync_d = sync_cl[settings.MONGODB_DB_NAME]
+        else:
+            sync_cl = _FallbackInMemoryClient()
+            sync_d = sync_cl[settings.MONGODB_DB_NAME]
+
+        if HAVE_MONGOMOCK_MOTOR and mongomock_motor is not None:
+            async_cl = mongomock_motor.AsyncMongoMockClient()
+            async_d = async_cl[settings.MONGODB_DB_NAME]
+        else:
+            async_cl = sync_cl
+            async_d = sync_d
+
+        return sync_cl, sync_d, async_cl, async_d, nonlocal_mock
+
+    if force_mock or not settings.MONGODB_ENABLED or not HAVE_PYMONGO or "<" in settings.MONGODB_URL:
+        if "<" in settings.MONGODB_URL:
+            logger.info("MongoDB URL contains placeholder (<db_password>). Using resilient in-memory MongoDB store.")
+        else:
+            logger.info("Initializing resilient in-memory MongoDB instance...")
+        _sync_client, _sync_db, _async_client, _async_db, _is_mock = _create_mock_clients()
         _initialized = True
         return _sync_db
 
@@ -74,15 +180,19 @@ def init_mongodb(force_mock: bool = False) -> Any:
 
         # Initialize async motor client
         try:
-            _async_client = AsyncIOMotorClient(
-                settings.MONGODB_URL,
-                serverSelectionTimeoutMS=2000,
-            )
-            _async_db = _async_client[settings.MONGODB_DB_NAME]
+            if HAVE_MOTOR and AsyncIOMotorClient is not None:
+                _async_client = AsyncIOMotorClient(
+                    settings.MONGODB_URL,
+                    serverSelectionTimeoutMS=2000,
+                )
+                _async_db = _async_client[settings.MONGODB_DB_NAME]
+            else:
+                _async_client = _sync_client
+                _async_db = _sync_db
         except Exception as e:
             logger.warning(f"Async motor client init deferred: {e}")
-            _async_client = mongomock_motor.AsyncMongoMockClient()
-            _async_db = _async_client[settings.MONGODB_DB_NAME]
+            _async_client = _sync_client
+            _async_db = _sync_db
 
         logger.info(f"Connected successfully to live MongoDB: {masked_url}/{settings.MONGODB_DB_NAME}")
         return _sync_db
@@ -90,13 +200,9 @@ def init_mongodb(force_mock: bool = False) -> Any:
     except (ConnectionFailure, ServerSelectionTimeoutError, Exception) as exc:
         logger.warning(
             f"Live MongoDB unreachable at {masked_url} ({exc}). "
-            f"Seamlessly falling back to high-performance in-memory mongomock store."
+            f"Seamlessly falling back to high-performance in-memory store."
         )
-        _sync_client = mongomock.MongoClient()
-        _sync_db = _sync_client[settings.MONGODB_DB_NAME]
-        _async_client = mongomock_motor.AsyncMongoMockClient()
-        _async_db = _async_client[settings.MONGODB_DB_NAME]
-        _is_mock = True
+        _sync_client, _sync_db, _async_client, _async_db, _is_mock = _create_mock_clients()
         _initialized = True
         return _sync_db
 

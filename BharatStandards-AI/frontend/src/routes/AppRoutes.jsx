@@ -60,6 +60,7 @@ export const AppRoutes = () => {
       {/* Auth Pages */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/signup" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* 403 Forbidden Access Denied Page */}
