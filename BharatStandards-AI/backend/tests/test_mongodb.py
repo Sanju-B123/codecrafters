@@ -9,6 +9,7 @@ Tests:
 - Admin subsystem telemetry integration
 """
 
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
@@ -30,7 +31,10 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def setup_mongodb_test_env():
-    """Ensure MongoDB is initialized and listeners registered before tests."""
+    """Ensure MongoDB is initialized, database schema created, and listeners registered before tests."""
+    from app.core.database import init_db
+    import app.models
+    init_db()
     init_mongodb(force_mock=True)
     register_mongo_sync_listeners()
     yield
@@ -58,10 +62,11 @@ def test_real_time_session_persistence():
     factory = get_session_factory()
     assert factory is not None
 
+    unique_std_num = f"TEST-IS-{uuid.uuid4().hex[:8]}"
     with factory() as session:
         # 1. Insert
         test_standard = Standard(
-            standard_number="TEST-IS-99999",
+            standard_number=unique_std_num,
             title="Automated Test Standard for MongoDB Mirroring",
             category="Testing",
             status=StandardStatus.ACTIVE.value,
@@ -76,7 +81,7 @@ def test_real_time_session_persistence():
     # Check MongoDB collection
     mongo_doc = db.standards.find_one({"_id": std_id})
     assert mongo_doc is not None
-    assert mongo_doc["standard_number"] == "TEST-IS-99999"
+    assert mongo_doc["standard_number"] == unique_std_num
     assert mongo_doc["title"] == "Automated Test Standard for MongoDB Mirroring"
     assert "_synced_at" in mongo_doc
 
@@ -105,9 +110,10 @@ def test_transaction_rollback_safety():
     db = get_mongo_db()
     factory = get_session_factory()
 
+    rollback_std_num = f"TEST-ROLLBACK-{uuid.uuid4().hex[:8]}"
     with factory() as session:
         aborted_standard = Standard(
-            standard_number="TEST-ROLLBACK-001",
+            standard_number=rollback_std_num,
             title="This should never be in MongoDB",
             category="Testing",
             status=StandardStatus.DRAFT.value,
@@ -118,7 +124,7 @@ def test_transaction_rollback_safety():
         session.rollback()
 
     # Verify not in MongoDB
-    doc = db.standards.find_one({"standard_number": "TEST-ROLLBACK-001"})
+    doc = db.standards.find_one({"standard_number": rollback_std_num})
     assert doc is None
 
 

@@ -46,6 +46,29 @@ from app.core.logging import logger
 if HAVE_PYMONGO:
     logging.getLogger("pymongo").setLevel(logging.WARNING)
 
+class _FallbackCursor:
+    def __init__(self, docs: List[Dict[str, Any]]):
+        self._docs = docs
+        self._skip = 0
+        self._limit = None
+
+    def skip(self, n: int):
+        self._skip = n
+        return self
+
+    def limit(self, n: int):
+        self._limit = n
+        return self
+
+    def __iter__(self):
+        sliced = self._docs[self._skip:]
+        if self._limit is not None:
+            sliced = sliced[:self._limit]
+        return iter(sliced)
+
+    def __list__(self):
+        return list(iter(self))
+
 # Built-in lightweight fallback in case neither pymongo nor mongomock is installed
 class _FallbackInMemoryCollection:
     def __init__(self, name: str):
@@ -71,11 +94,13 @@ class _FallbackInMemoryCollection:
 
     def find(self, filter_dict: Optional[Dict[str, Any]] = None):
         if not filter_dict:
-            return [dict(d) for d in self._docs.values()]
-        return [dict(d) for d in self._docs.values() if all(d.get(k) == v for k, v in filter_dict.items())]
+            docs = [dict(d) for d in self._docs.values()]
+        else:
+            docs = [dict(d) for d in self._docs.values() if all(d.get(k) == v for k, v in filter_dict.items())]
+        return _FallbackCursor(docs)
 
     def count_documents(self, filter_dict: Optional[Dict[str, Any]] = None):
-        return len(self.find(filter_dict))
+        return len(list(self.find(filter_dict)))
 
     def delete_one(self, filter_dict: Dict[str, Any]):
         target = self.find_one(filter_dict)
@@ -92,6 +117,11 @@ class _FallbackInMemoryDB:
             self._collections[item] = _FallbackInMemoryCollection(item)
         return self._collections[item]
 
+    def __getattr__(self, item: str):
+        if item.startswith("_"):
+            raise AttributeError(item)
+        return self[item]
+
     def list_collection_names(self):
         return list(self._collections.keys())
 
@@ -104,6 +134,11 @@ class _FallbackInMemoryClient:
         if item not in self._dbs:
             self._dbs[item] = _FallbackInMemoryDB(item)
         return self._dbs[item]
+
+    def __getattr__(self, item: str):
+        if item.startswith("_"):
+            raise AttributeError(item)
+        return self[item]
 
     def close(self):
         pass
