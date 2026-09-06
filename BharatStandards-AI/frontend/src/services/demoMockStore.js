@@ -364,7 +364,10 @@ const INITIAL_COMPLIANCE_REPORTS = [
   {
     id: 1,
     product_id: 1,
+    product_name: 'Domestic Electric Water Heater (25L Storage)',
     standard_id: 1,
+    standard_number: 'DEMO-IS-001',
+    standard_title: 'Domestic Electrical Storage Water Heaters - Safety & Performance Specifications',
     user_id: 1,
     readiness_score: 78,
     status: 'COMPLETED',

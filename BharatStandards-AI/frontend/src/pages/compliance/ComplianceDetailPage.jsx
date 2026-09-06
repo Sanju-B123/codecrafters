@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   XCircle,
   FileText,
+  Compass,
   Search,
   Filter,
   ArrowUpDown,
