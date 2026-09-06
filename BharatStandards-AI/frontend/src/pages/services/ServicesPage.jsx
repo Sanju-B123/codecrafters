@@ -98,7 +98,23 @@ export const ServicesPage = () => {
           page,
           page_size: 9,
         });
-        setServicesData(res);
+        if (Array.isArray(res)) {
+          setServicesData({
+            items: res,
+            total: res.length,
+            pages: Math.ceil(res.length / 9) || 1,
+            page: 1,
+          });
+        } else if (res && Array.isArray(res.items)) {
+          setServicesData({
+            items: res.items,
+            total: res.total ?? res.items.length,
+            pages: res.pages ?? Math.ceil((res.total ?? res.items.length) / 9) ?? 1,
+            page: res.page ?? 1,
+          });
+        } else {
+          setServicesData({ items: [], total: 0, pages: 1, page: 1 });
+        }
       } catch (err) {
         console.error('Error fetching services:', err);
         setError('Unable to load BIS services catalogue. Please verify backend service.');
@@ -314,7 +330,7 @@ export const ServicesPage = () => {
             {product ? 'All BIS Services & Schemes' : 'Available Services & Guidance'}
           </h2>
           <span className="text-xs text-slate-500">
-            {servicesData.total} {servicesData.total === 1 ? 'service' : 'services'} available
+            {(servicesData?.total ?? servicesData?.items?.length) || 0} {((servicesData?.total ?? servicesData?.items?.length) || 0) === 1 ? 'service' : 'services'} available
           </span>
         </div>
 
@@ -328,7 +344,7 @@ export const ServicesPage = () => {
             <AlertCircle className="w-6 h-6 mx-auto mb-2 text-rose-600" />
             <p className="text-xs font-semibold">{error}</p>
           </div>
-        ) : servicesData.items.length === 0 ? (
+        ) : (!servicesData?.items || servicesData.items.length === 0) ? (
           <div className="p-12 rounded-2xl bg-white border border-slate-200 text-center space-y-3">
             <AlertCircle className="w-8 h-8 text-slate-400 mx-auto" />
             <h3 className="text-sm font-bold text-slate-800">No Services Found</h3>
@@ -344,30 +360,30 @@ export const ServicesPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {servicesData.items.map((svc) => (
+            {(servicesData?.items || []).map((svc) => (
               <ServiceCard key={svc.id} service={svc} />
             ))}
           </div>
         )}
 
         {/* Pagination */}
-        {servicesData.pages > 1 && (
+        {(servicesData?.pages || 1) > 1 && (
           <div className="pt-4 flex items-center justify-between border-t border-slate-200 text-xs">
             <span className="text-slate-500">
-              Page {servicesData.page} of {servicesData.pages}
+              Page {servicesData?.page || 1} of {servicesData?.pages || 1}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={servicesData.page <= 1}
+                disabled={(servicesData?.page || 1) <= 1}
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Previous
               </button>
               <button
-                onClick={() => setPage((p) => Math.min(servicesData.pages, p + 1))}
-                disabled={servicesData.page >= servicesData.pages}
+                onClick={() => setPage((p) => Math.min(servicesData?.pages || 1, p + 1))}
+                disabled={(servicesData?.page || 1) >= (servicesData?.pages || 1)}
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
               >
                 Next

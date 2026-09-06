@@ -40,6 +40,13 @@ except ImportError:
     mongomock_motor = None
     HAVE_MONGOMOCK_MOTOR = False
 
+try:
+    import certifi
+    HAVE_CERTIFI = True
+except ImportError:
+    certifi = None
+    HAVE_CERTIFI = False
+
 from app.core.config import settings
 from app.core.logging import logger
 
@@ -200,11 +207,17 @@ def init_mongodb(force_mock: bool = False) -> Any:
     # Attempt connection to live MongoDB
     try:
         logger.info(f"Connecting to MongoDB at {masked_url}...")
+        client_options: Dict[str, Any] = {
+            "serverSelectionTimeoutMS": 5000,
+            "connectTimeoutMS": 5000,
+            "socketTimeoutMS": 10000,
+        }
+        if HAVE_CERTIFI and certifi is not None:
+            client_options["tlsCAFile"] = certifi.where()
+
         client = MongoClient(
             settings.MONGODB_URL,
-            serverSelectionTimeoutMS=2000,
-            connectTimeoutMS=2000,
-            socketTimeoutMS=5000,
+            **client_options,
         )
         # Test connection
         client.admin.command("ping")
@@ -216,9 +229,14 @@ def init_mongodb(force_mock: bool = False) -> Any:
         # Initialize async motor client
         try:
             if HAVE_MOTOR and AsyncIOMotorClient is not None:
+                motor_options: Dict[str, Any] = {
+                    "serverSelectionTimeoutMS": 5000,
+                }
+                if HAVE_CERTIFI and certifi is not None:
+                    motor_options["tlsCAFile"] = certifi.where()
                 _async_client = AsyncIOMotorClient(
                     settings.MONGODB_URL,
-                    serverSelectionTimeoutMS=2000,
+                    **motor_options,
                 )
                 _async_db = _async_client[settings.MONGODB_DB_NAME]
             else:

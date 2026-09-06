@@ -401,8 +401,49 @@ export const MOCK_SERVICES = [
       'Critical Component Conformance Certificates (Thermostat, Thermal Cut-out, Wiring)',
       'Factory Registration / Business Incorporation Certificate',
     ],
+    steps: [
+      {
+        step_number: 1,
+        title: 'Factory Quality Management & Testing Facility Setup',
+        description: 'Ensure in-house testing equipment is calibrated and Scheme-I Quality Assurance Plan (QAP) is documented.',
+        action_type: 'VIEW_STANDARD',
+        action_target: '/standards',
+      },
+      {
+        step_number: 2,
+        title: 'Preliminary Type Examination at Accredited Laboratory',
+        description: 'Submit representative production samples to an accredited laboratory for statutory testing.',
+        action_type: 'UPLOAD_DOCUMENT',
+        action_target: '/documents',
+      },
+      {
+        step_number: 3,
+        title: 'Manakonline Portal Application Submission',
+        description: 'File statutory Form-V along with factory layout, test reports, and initial statutory fee.',
+        action_type: 'OPEN_OFFICIAL_SOURCE',
+        action_target: 'https://www.manakonline.in',
+      },
+      {
+        step_number: 4,
+        title: 'Factory Verification Audit by BIS Inspecting Officer',
+        description: 'BIS inspecting officer visits manufacturing premises to verify manufacturing capability and routine testing.',
+        action_type: 'CONTACT_AUTHORITY',
+        action_target: 'https://bis.gov.in',
+      },
+      {
+        step_number: 5,
+        title: 'Grant of Certification License & ISI Mark Allotment',
+        description: 'Upon successful inspection and independent sample testing, CM/L certification license number is issued.',
+        action_type: 'VIEW_SERVICE',
+        action_target: '/services/1',
+      },
+    ],
+    official_source_name: 'Manakonline BIS Portal',
+    official_source_url: 'https://www.manakonline.in',
     status: 'ACTIVE',
     is_demo: true,
+    created_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-09-06T10:00:00Z',
   },
   {
     id: 2,
@@ -418,8 +459,35 @@ export const MOCK_SERVICES = [
       'Brand / Trademark Registration Certificate',
       'Factory Business License and Authorized Indian Representative (AIR) appointment',
     ],
+    steps: [
+      {
+        step_number: 1,
+        title: 'Sample Testing at BIS Recognized Laboratory',
+        description: 'Send safety-critical electronic samples for safety and EMC testing under relevant IS standard.',
+        action_type: 'UPLOAD_DOCUMENT',
+        action_target: '/documents',
+      },
+      {
+        step_number: 2,
+        title: 'Online CRS Portal Filing',
+        description: 'Register brand and submit test report within 90 days of issuance.',
+        action_type: 'OPEN_OFFICIAL_SOURCE',
+        action_target: 'https://www.crsbis.in',
+      },
+      {
+        step_number: 3,
+        title: 'Registration Grant & Standard Mark Labeling',
+        description: 'Receive R-number and affix CRS safety logo on product packaging.',
+        action_type: 'VIEW_SERVICE',
+        action_target: '/services/2',
+      },
+    ],
+    official_source_name: 'BIS CRS Portal',
+    official_source_url: 'https://www.crsbis.in',
     status: 'ACTIVE',
     is_demo: true,
+    created_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-09-06T10:00:00Z',
   },
   {
     id: 3,
@@ -431,8 +499,28 @@ export const MOCK_SERVICES = [
     user_type: 'LABORATORY',
     eligibility: 'Test laboratories with ISO/IEC 17025 accreditation.',
     required_documents: ['NABL Accreditation Certificate', 'Equipment Calibration Traceability', 'Proficiency Testing Records'],
+    steps: [
+      {
+        step_number: 1,
+        title: 'Accreditation Scope Verification',
+        description: 'Ensure ISO/IEC 17025 scope matches target Indian Standards.',
+        action_type: 'VIEW_STANDARD',
+        action_target: '/standards',
+      },
+      {
+        step_number: 2,
+        title: 'Audit and Proficiency Evaluation',
+        description: 'BIS technical assessment team validates inter-laboratory comparisons.',
+        action_type: 'CONTACT_AUTHORITY',
+        action_target: 'https://bis.gov.in',
+      },
+    ],
+    official_source_name: 'BIS National Laboratories',
+    official_source_url: 'https://www.bis.gov.in',
     status: 'ACTIVE',
     is_demo: true,
+    created_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-09-06T10:00:00Z',
   },
   {
     id: 4,
@@ -444,8 +532,28 @@ export const MOCK_SERVICES = [
     user_type: 'BOTH',
     eligibility: 'Jewelers, precious metal assaying and hallmarking centers.',
     required_documents: ['Assaying Equipment Calibration', 'HUID Laser Marking Logs'],
+    steps: [
+      {
+        step_number: 1,
+        title: 'Assaying Center Registration',
+        description: 'Register certified assaying facility with XRF and cupellation assaying.',
+        action_type: 'OPEN_OFFICIAL_SOURCE',
+        action_target: 'https://www.manakonline.in',
+      },
+      {
+        step_number: 2,
+        title: 'HUID Traceability Integration',
+        description: 'Integrate unique 6-digit alphanumeric HUID marking system.',
+        action_type: 'VIEW_SERVICE',
+        action_target: '/services/4',
+      },
+    ],
+    official_source_name: 'BIS Hallmarking Directorate',
+    official_source_url: 'https://www.bis.gov.in',
     status: 'ACTIVE',
     is_demo: true,
+    created_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-09-06T10:00:00Z',
   },
 ];
 
@@ -476,6 +584,41 @@ export const demoMockStore = {
     const method = (options.method || 'GET').toUpperCase();
     const cleanEndpoint = endpoint.replace(/^\/api/, '').replace(/\/+$/, '');
     const urlParts = cleanEndpoint.split('?')[0].split('/').filter(Boolean);
+
+    // 0. AUTHENTICATION
+    if (urlParts[0] === 'auth') {
+      if (urlParts[1] === 'me') {
+        const cachedUserRaw = typeof localStorage !== 'undefined' ? localStorage.getItem('bharat_standards_user') : null;
+        if (cachedUserRaw) {
+          try {
+            return JSON.parse(cachedUserRaw);
+          } catch (e) {}
+        }
+        return {
+          id: 1,
+          name: 'Demo Compliance Officer',
+          email: 'demo@bharatstandards.ai',
+          role: 'industry',
+          is_active: true,
+        };
+      }
+      if (urlParts[1] === 'login') {
+        return {
+          access_token: `bs_demo_token_${Date.now()}`,
+          token_type: 'bearer',
+          user: {
+            id: 1,
+            name: 'Demo Compliance Officer',
+            email: 'demo@bharatstandards.ai',
+            role: 'industry',
+            is_active: true,
+          },
+        };
+      }
+      if (urlParts[1] === 'logout') {
+        return { message: 'Logged out successfully' };
+      }
+    }
 
     // 1. STANDARDS
     if (urlParts[0] === 'standards') {
@@ -565,6 +708,23 @@ export const demoMockStore = {
           confidence_score: 0.95,
           recommended_schemes: ['Scheme-I ISI Mark Certification'],
         };
+      }
+
+      if (urlParts.length === 3 && urlParts[2] === 'services') {
+        return [
+          {
+            service: MOCK_SERVICES[0],
+            match_reason: 'Mandatory statutory Scheme-I conformity for domestic appliances',
+            priority: 'CRITICAL',
+            suggested_actions: ['Conduct preliminary type examination', 'Prepare in-house testing logs'],
+          },
+          {
+            service: MOCK_SERVICES[1],
+            match_reason: 'Electronic components and safety controls verification',
+            priority: 'HIGH',
+            suggested_actions: ['Check CRS component coverage', 'Gather laboratory certificates'],
+          },
+        ];
       }
     }
 
@@ -708,11 +868,33 @@ export const demoMockStore = {
     }
 
     // 5. BIS SERVICES
-    if (urlParts[0] === 'services') {
+    if (urlParts[0] === 'services' || urlParts[0] === 'bis-services') {
       if (urlParts.length === 1) {
-        return MOCK_SERVICES;
+        return {
+          items: MOCK_SERVICES,
+          total: MOCK_SERVICES.length,
+          page: 1,
+          page_size: 10,
+          pages: 1,
+        };
       }
       if (urlParts.length === 2) {
+        if (urlParts[1] === 'recommended') {
+          return [
+            {
+              service: MOCK_SERVICES[0],
+              match_reason: 'Statutory compliance requirement for domestic electrical appliances',
+              priority: 'HIGH',
+              suggested_actions: ['Prepare Factory Quality Plan (QAP)', 'Engage accredited testing laboratory'],
+            },
+            {
+              service: MOCK_SERVICES[1],
+              match_reason: 'Compulsory self-declaration standard for safety controls',
+              priority: 'MEDIUM',
+              suggested_actions: ['Review component test reports', 'Map standard clauses'],
+            },
+          ];
+        }
         return (
           MOCK_SERVICES.find((s) => s.service_code === urlParts[1] || String(s.id) === urlParts[1]) ||
           MOCK_SERVICES[0]
@@ -722,11 +904,11 @@ export const demoMockStore = {
 
     // 6. ACTIVITY LOG
     if (urlParts[0] === 'activity') {
-      return [
+      const logs = [
         {
           id: 1,
           action: 'COMPLIANCE_EVALUATED',
-          entity_type: 'compliance',
+          entity_type: 'compliance_report',
           entity_id: 1,
           description: 'Evaluated Domestic Electric Water Heater against DEMO-IS-001 (78% readiness).',
           created_at: '2026-09-06T10:10:00Z',
@@ -748,6 +930,12 @@ export const demoMockStore = {
           created_at: '2026-09-06T10:00:00Z',
         },
       ];
+      return {
+        items: logs,
+        total: logs.length,
+        page: 1,
+        pages: 1,
+      };
     }
 
     // 7. REPORTS
@@ -833,6 +1021,158 @@ export const demoMockStore = {
       }
       if (urlParts[1] === 'frontend-state') {
         return { exists: true, data: null };
+      }
+    }
+
+    // 10. ADMIN PORTAL TELEMETRY & MANAGEMENT
+    if (urlParts[0] === 'admin') {
+      if (urlParts[1] === 'metrics') {
+        return {
+          totals: {
+            users: 3,
+            admins: 1,
+            suspended_users: 0,
+            products: getList(STORAGE_KEYS.PRODUCTS, INITIAL_PRODUCTS).length,
+            standards: MOCK_STANDARDS.length,
+            archived_standards: 0,
+            requirements: MOCK_REQUIREMENTS.length,
+            documents: getList(STORAGE_KEYS.DOCUMENTS, INITIAL_DOCUMENTS).length,
+            reports: 1,
+            bis_services: MOCK_SERVICES.length,
+            audit_events: 18,
+            indexed_items: 25,
+            unindexed_items: 0,
+          },
+          velocity: {
+            new_users: 2,
+            new_reports: 1,
+            audit_events: 6,
+          },
+          top_standards: [
+            { code: 'DEMO-IS-001', title: 'Domestic Electric Water Heaters', evaluations: 12 },
+            { code: 'IS 2082:2018', title: 'Stationary Storage Water Heaters', evaluations: 8 },
+          ],
+          top_gaps: [
+            { description: 'Clause 19.1 Bilingual Rating Plate Proof', priority: 'HIGH', count: 3 },
+            { description: 'Clause 11.4 Dry-Burn Thermal Cutoff', priority: 'HIGH', count: 2 },
+          ],
+          daily_velocity: [
+            { date: '2026-09-01', audits: 4, reports: 1, users: 1 },
+            { date: '2026-09-02', audits: 6, reports: 2, users: 0 },
+            { date: '2026-09-03', audits: 8, reports: 1, users: 1 },
+            { date: '2026-09-04', audits: 12, reports: 3, users: 1 },
+            { date: '2026-09-05', audits: 15, reports: 2, users: 0 },
+            { date: '2026-09-06', audits: 18, reports: 4, users: 1 },
+          ],
+        };
+      }
+
+      if (urlParts[1] === 'health') {
+        return {
+          overall_status: 'HEALTHY',
+          timestamp: new Date().toISOString(),
+          subsystems: {
+            database: { status: 'HEALTHY', latency_ms: 12, details: 'In-browser state mirror active' },
+            api_gateway: { status: 'HEALTHY', latency_ms: 8, details: 'Proxy and fallback route operational' },
+            document_processing: { status: 'HEALTHY', latency_ms: 24, details: 'PDF OCR and parsing pipeline active' },
+            ai_reasoning_engine: { status: 'HEALTHY', latency_ms: 45, details: 'Synthetic compliance evaluator ready' },
+            vector_embedding_service: { status: 'HEALTHY', latency_ms: 15, details: 'Local semantic vector index operational' },
+            mongodb: { status: 'HEALTHY', latency_ms: 10, details: 'Resilient MongoDB persistence state active' },
+          },
+        };
+      }
+
+      if (urlParts[1] === 'standards') {
+        return MOCK_STANDARDS;
+      }
+
+      if (urlParts[1] === 'bis-services') {
+        return MOCK_SERVICES;
+      }
+
+      if (urlParts[1] === 'users') {
+        return [
+          {
+            id: 1,
+            email: 'admin@bharatstandards.ai',
+            full_name: 'Lead Compliance Auditor',
+            role: 'ADMIN',
+            status: 'ACTIVE',
+            created_at: '2026-09-01T00:00:00Z',
+            last_login: '2026-09-06T10:00:00Z',
+          },
+          {
+            id: 2,
+            email: 'demo@bharatstandards.ai',
+            full_name: 'Bharat Manufacturing Enterprise',
+            role: 'INDUSTRY',
+            status: 'ACTIVE',
+            created_at: '2026-09-02T00:00:00Z',
+            last_login: '2026-09-06T12:00:00Z',
+          },
+          {
+            id: 3,
+            email: 'consumer@bharatstandards.ai',
+            full_name: 'Priya Sharma (Citizen Buyer)',
+            role: 'CONSUMER',
+            status: 'ACTIVE',
+            created_at: '2026-09-03T00:00:00Z',
+            last_login: '2026-09-06T14:00:00Z',
+          },
+        ];
+      }
+
+      if (urlParts[1] === 'audit') {
+        return {
+          items: [
+            {
+              id: 1,
+              action: 'COMPLIANCE_EVALUATED',
+              entity_type: 'compliance_report',
+              entity_id: 1,
+              user_id: 1,
+              description: 'Evaluated Domestic Electric Water Heater against DEMO-IS-001 (78% readiness).',
+              created_at: '2026-09-06T10:10:00Z',
+            },
+            {
+              id: 2,
+              action: 'DOCUMENT_UPLOADED',
+              entity_type: 'document',
+              entity_id: 1,
+              user_id: 1,
+              description: 'Uploaded NABL Laboratory Test Report - DEWH 25L (2026).pdf',
+              created_at: '2026-09-06T10:05:00Z',
+            },
+          ],
+          total: 2,
+          page: 1,
+          pages: 1,
+        };
+      }
+
+      if (urlParts[1] === 'requirements') {
+        return MOCK_REQUIREMENTS;
+      }
+
+      if (urlParts[1] === 'knowledge-sources') {
+        return [
+          {
+            id: 1,
+            title: 'Bureau of Indian Standards Official Portal',
+            url: 'https://www.bis.gov.in',
+            source_type: 'PORTAL',
+            status: 'ACTIVE',
+            last_synced_at: '2026-09-06T00:00:00Z',
+          },
+          {
+            id: 2,
+            title: 'Manakonline BIS E-Governance Platform',
+            url: 'https://www.manakonline.in',
+            source_type: 'SCHEME_DATABASE',
+            status: 'ACTIVE',
+            last_synced_at: '2026-09-06T00:00:00Z',
+          },
+        ];
       }
     }
 

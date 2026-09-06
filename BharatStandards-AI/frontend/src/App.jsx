@@ -4,6 +4,7 @@ import { AppRoutes } from '@/routes/AppRoutes';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastProvider } from '@/components/ui/ToastContext';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { mongoStorageService } from '@/services/mongoStorageService';
 
 export const App = () => {
@@ -24,9 +25,11 @@ export const App = () => {
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <ErrorBoundary>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </ErrorBoundary>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>

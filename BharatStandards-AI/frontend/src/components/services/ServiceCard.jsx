@@ -11,7 +11,9 @@ export const ServiceCard = ({
 }) => {
   const navigate = useNavigate();
 
-  const getCategoryBadgeColor = (category) => {
+  if (!service) return null;
+
+  const getCategoryBadgeColor = (category = '') => {
     switch (category) {
       case 'CERTIFICATION':
         return 'bg-blue-50 text-blue-700 border-blue-200';
@@ -28,7 +30,7 @@ export const ServiceCard = ({
     }
   };
 
-  const getUserTypeBadge = (userType) => {
+  const getUserTypeBadge = (userType = 'BOTH') => {
     switch (userType) {
       case 'INDUSTRY':
         return { label: 'Industry & Manufacturers', icon: Building2 };
@@ -39,7 +41,7 @@ export const ServiceCard = ({
     }
   };
 
-  const userTypeInfo = getUserTypeBadge(service.user_type);
+  const userTypeInfo = getUserTypeBadge(service?.user_type);
   const UserTypeIcon = userTypeInfo.icon;
 
   return (
@@ -54,10 +56,10 @@ export const ServiceCard = ({
           <div className="flex flex-wrap items-center gap-1.5">
             <span
               className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${getCategoryBadgeColor(
-                service.category
+                service?.category
               )}`}
             >
-              {service.category.replace('_', ' ')}
+              {(service?.category || 'GENERAL').replace('_', ' ')}
             </span>
 
             {service.is_demo && (
