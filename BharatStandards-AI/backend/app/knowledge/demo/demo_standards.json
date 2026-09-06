@@ -1,0 +1,107 @@
+{
+  "source": {
+    "source_type": "DEMO",
+    "name": "SIH Demonstration Synthetic Knowledge Repository (DEMO / SYNTHETIC DATA)",
+    "url": "https://demo.bharatstandards.ai/datasets",
+    "description": "Controlled demonstration dataset of synthetic Indian Standards for platform validation. (DEMO / SYNTHETIC DATA)",
+    "authority_level": "MEDIUM"
+  },
+  "standards": [
+    {
+      "standard_number": "DEMO-IS-001:2026",
+      "title": "Stationary Electric Water Storage Heaters Safety Specification (DEMO / SYNTHETIC DATA)",
+      "category": "Household Electrical Appliances",
+      "version": "2026",
+      "scope": "Specification covering constructional, electrical safety, insulation resistance, and pressurized hydrostatic burst requirements for household electric water heaters.",
+      "description": "Synthetic compliance benchmark for electric water heating vessels up to 250V AC. Clearly marked as DEMO / SYNTHETIC DATA.",
+      "status": "DRAFT",
+      "source": "Synthetic Benchmark Corpus (DEMO / SYNTHETIC DATA)",
+      "is_demo": true,
+      "requirements": [
+        {
+          "clause": "4.1",
+          "title": "Dielectric Insulation Withstand Voltage",
+          "description": "The insulation between live conductor pins and accessible ground chassis shall withstand a test potential of 1500V RMS at 50Hz for not less than 60 seconds without dielectric puncture or flashover.",
+          "category": "SAFETY",
+          "priority": "CRITICAL",
+          "evidence_types": ["test_report"],
+          "verification_method": "High-potential dielectric withstand test apparatus 1500V RMS",
+          "weight": 3.0
+        },
+        {
+          "clause": "4.2",
+          "title": "Hydrostatic Pressure Containment",
+          "description": "The water storage container vessel shall sustain a continuous hydraulic pressure of 1.2 MPa for 15 minutes without permanent deformation, seam rupture, or measurable leakage.",
+          "category": "PERFORMANCE",
+          "priority": "HIGH",
+          "evidence_types": ["test_report", "calibration_cert"],
+          "verification_method": "Hydrostatic pressure test bench with calibrated digital gauge",
+          "weight": 2.5
+        },
+        {
+          "clause": "5.3",
+          "title": "Thermal Cutout & Pressure Relief Overpressure Protection",
+          "description": "An independent non-self-resetting thermal limiter shall disconnect all ungrounded conductors before water vessel temperature reaches 95 degrees Celsius.",
+          "category": "SAFETY",
+          "priority": "CRITICAL",
+          "evidence_types": ["schematic", "test_report"],
+          "verification_method": "Simulated dry-boil thermal sensor monitoring",
+          "weight": 3.0
+        },
+        {
+          "clause": "7.1",
+          "title": "Mandatory Conformity Marking & Rating Plate",
+          "description": "Every heater shall bear a legible, indelible rating label displaying rated voltage, wattage, rated capacity in litres, operating pressure, and country of origin.",
+          "category": "MARKING",
+          "priority": "MEDIUM",
+          "evidence_types": ["photograph", "spec_sheet"],
+          "verification_method": "Visual inspection and rubbing test with water and petroleum spirit for 15s",
+          "weight": 1.5
+        }
+      ]
+    },
+    {
+      "standard_number": "DEMO-IS-002:2026",
+      "title": "Lithium-Ion Energy Storage Battery Pack Safety Criteria (DEMO / SYNTHETIC DATA)",
+      "category": "Energy Storage & Electronics",
+      "version": "2026",
+      "scope": "Comprehensive safety requirements for secondary lithium battery packs used in consumer electronic devices and light electric vehicles.",
+      "description": "Synthetic benchmark for battery thermal stability, short circuit protection, and cell overcharge prevention. (DEMO / SYNTHETIC DATA)",
+      "status": "DRAFT",
+      "source": "Synthetic Benchmark Corpus (DEMO / SYNTHETIC DATA)",
+      "is_demo": true,
+      "requirements": [
+        {
+          "clause": "3.1",
+          "title": "External Direct Short Circuit Protection",
+          "description": "The fully charged battery pack shall be subjected to an external short-circuit resistance of less than 5 milliohms at 55 degrees Celsius. The internal BMS shall trip within 50 milliseconds without explosion or thermal runaway.",
+          "category": "SAFETY",
+          "priority": "CRITICAL",
+          "evidence_types": ["test_report"],
+          "verification_method": "High-current external short circuit test rig in explosion-resistant chamber",
+          "weight": 3.0
+        },
+        {
+          "clause": "3.4",
+          "title": "Overcharge Current and Voltage Limiting",
+          "description": "Charging shall be continued at 2.0 times rated current until the protective circuit terminates charging or the cell temperature reaches steady state without rupture or fire.",
+          "category": "SAFETY",
+          "priority": "CRITICAL",
+          "evidence_types": ["test_report", "schematic"],
+          "verification_method": "Programmable DC power supply with thermal thermocouple logging",
+          "weight": 3.0
+        },
+        {
+          "clause": "6.2",
+          "title": "Drop and Mechanical Shock Resistance",
+          "description": "The pack shall be dropped from a height of 1.0 meter onto concrete surface on each of its 6 faces without cell leakage, flame, or loss of protective insulation.",
+          "category": "PERFORMANCE",
+          "priority": "HIGH",
+          "evidence_types": ["test_report", "photograph"],
+          "verification_method": "Automated mechanical drop tower fixture",
+          "weight": 2.0
+        }
+      ]
+    }
+  ]
+}

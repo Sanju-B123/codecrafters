@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: bharatstandards-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bharat_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bharat_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-bharat_standards_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bharat_user} -d ${POSTGRES_DB:-bharat_standards_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bharat-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bharatstandards-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=BharatStandards AI
+      - APP_ENV=development
+      - DEBUG=true
+      - DATABASE_URL=postgresql://bharat_user:bharat_secure_password@db:5432/bharat_standards_db
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - bharat-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bharatstandards-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - bharat-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  bharat-network:
+    driver: bridge
