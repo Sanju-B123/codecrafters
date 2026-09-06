@@ -14,11 +14,14 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { adminService } from '@/services/adminService';
+import { mongoStorageService } from '@/services/mongoStorageService';
 
 export const AdminHealthPage = () => {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [probing, setProbing] = useState(false);
+  const [syncingMongo, setSyncingMongo] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
 
   const runHealthProbe = async () => {
     try {
@@ -33,6 +36,20 @@ export const AdminHealthPage = () => {
     }
   };
 
+  const handleSyncMongo = async () => {
+    try {
+      setSyncingMongo(true);
+      setSyncResult(null);
+      const res = await mongoStorageService.triggerSync();
+      setSyncResult(`Successfully synced ${res.total_records} records across ${res.synced_tables} collections into MongoDB.`);
+      await runHealthProbe();
+    } catch (err) {
+      setSyncResult(`MongoDB sync error: ${err.message}`);
+    } finally {
+      setSyncingMongo(false);
+    }
+  };
+
   useEffect(() => {
     runHealthProbe();
   }, []);
@@ -40,6 +57,7 @@ export const AdminHealthPage = () => {
   const getSubsystemIcon = (key) => {
     switch (key) {
       case 'database':
+      case 'mongodb':
         return Database;
       case 'api_gateway':
         return Server;
@@ -76,15 +94,42 @@ export const AdminHealthPage = () => {
           </p>
         </div>
 
-        <button
-          onClick={runHealthProbe}
-          disabled={probing}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${probing ? 'animate-spin' : ''}`} />
-          <span>Re-run Probes</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleSyncMongo}
+            disabled={syncingMongo || probing}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/30 transition disabled:opacity-50"
+          >
+            <Database className={`w-3.5 h-3.5 ${syncingMongo ? 'animate-pulse' : ''}`} />
+            <span>{syncingMongo ? 'Syncing to MongoDB...' : 'Sync SQL to MongoDB'}</span>
+          </button>
+
+          <button
+            onClick={runHealthProbe}
+            disabled={probing}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${probing ? 'animate-spin' : ''}`} />
+            <span>Re-run Probes</span>
+          </button>
+        </div>
       </div>
+
+      {/* Sync Notification Banner */}
+      {syncResult && (
+        <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 text-xs flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span>{syncResult}</span>
+          </div>
+          <button
+            onClick={() => setSyncResult(null)}
+            className="text-slate-400 hover:text-white"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Overall Health Status Banner */}
       <div

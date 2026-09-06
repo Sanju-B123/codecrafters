@@ -18,7 +18,8 @@ export interface AdminHealthResponse {
     document_processing: SubsystemHealth;
     ai_reasoning_engine: SubsystemHealth;
     vector_embedding_service: SubsystemHealth;
-    [key: string]: SubsystemHealth;
+    mongodb?: SubsystemHealth;
+    [key: string]: SubsystemHealth | undefined;
   };
 }
 

@@ -285,6 +285,27 @@ class AdminService:
             },
         }
 
+        # 6. MongoDB Persistence Subsystem Check
+        try:
+            from app.core.mongodb import ping_mongodb
+            mongo_ping = ping_mongodb()
+            mongo_status = "HEALTHY" if mongo_ping.get("status") == "connected" else "DEGRADED"
+            mongo_details = (
+                f"Engine: {mongo_ping.get('mode')} | Collections: {mongo_ping.get('collections_count', 0)} "
+                f"| Records: {mongo_ping.get('total_documents', 0)}"
+            )
+            mongo_latency = mongo_ping.get("latency_ms", 0.0)
+        except Exception as me:
+            mongo_status = "DEGRADED"
+            mongo_details = f"MongoDB probe fallback: {str(me)[:100]}"
+            mongo_latency = -1
+
+        subsystems["mongodb"] = {
+            "status": mongo_status,
+            "latency_ms": mongo_latency,
+            "details": mongo_details,
+        }
+
         overall_status = "HEALTHY"
         if any(s["status"] == "UNAVAILABLE" for s in subsystems.values()):
             overall_status = "UNAVAILABLE"

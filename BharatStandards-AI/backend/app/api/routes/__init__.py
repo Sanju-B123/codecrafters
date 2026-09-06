@@ -19,6 +19,7 @@ from app.api.routes.admin import router as admin_router
 from app.api.routes.knowledge_admin import router as knowledge_admin_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes.search import router as search_router
+from app.api.routes.mongodb_routes import router as mongodb_router
 
 api_router = APIRouter()
 
@@ -40,6 +41,7 @@ api_router.include_router(notifications_router)
 api_router.include_router(admin_router)
 api_router.include_router(knowledge_admin_router)
 api_router.include_router(search_router)
+api_router.include_router(mongodb_router)
 
 __all__ = ["api_router"]
 

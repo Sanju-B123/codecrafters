@@ -18,11 +18,25 @@ async def lifespan(app: FastAPI):
         from app.core.database import init_db
         import app.models  # Ensure all SQLAlchemy models are registered
         init_db()
+
+        # Initialize MongoDB persistence layer and real-time sync listeners
+        from app.core.mongodb import init_mongodb, close_mongo_client
+        from app.core.mongo_sync import register_mongo_sync_listeners
+        from app.services.mongodb_sync import sync_all_sql_to_mongo
+
+        init_mongodb()
+        register_mongo_sync_listeners()
+        sync_all_sql_to_mongo()
     except Exception as e:
         logger.warning(f"Database initialization deferred or failed: {e}")
     yield
 
     logger.info(f"Shutting down {settings.APP_NAME}...")
+    try:
+        from app.core.mongodb import close_mongo_client
+        close_mongo_client()
+    except Exception:
+        pass
 
 
 def create_application() -> FastAPI:

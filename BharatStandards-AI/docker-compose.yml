@@ -20,6 +20,23 @@ services:
     networks:
       - bharat-network
 
+  mongodb:
+    image: mongo:7.0
+    container_name: bharatstandards-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - bharat-network
+
   backend:
     build:
       context: ./backend
@@ -33,10 +50,15 @@ services:
       - APP_ENV=development
       - DEBUG=true
       - DATABASE_URL=postgresql://bharat_user:bharat_secure_password@db:5432/bharat_standards_db
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=bharat_standards
+      - MONGODB_ENABLED=true
       - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173
     depends_on:
       db:
         condition: service_healthy
+      mongodb:
+        condition: service_started
     volumes:
       - ./backend:/app
     networks:
@@ -62,6 +84,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  mongodb_data:
     driver: local
 
 networks:

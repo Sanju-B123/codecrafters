@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     # Database Configuration (defaults to SQLite for frictionless local dev and testing)
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./bharat_standards.db")
 
+    # MongoDB Configuration
+    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+    MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "bharat_standards")
+    MONGODB_ENABLED: bool = os.getenv("MONGODB_ENABLED", "true").lower() in ("true", "1", "yes")
+
     # AI & LLM Provider Configuration
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "mock")  # "mock" | "openai"
     LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini")
