@@ -8,6 +8,8 @@ const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '
 export const TOKEN_STORAGE_KEY = 'bharat_standards_token';
 export const USER_STORAGE_KEY = 'bharat_standards_user';
 
+import { demoMockStore } from './demoMockStore';
+
 export class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
@@ -74,6 +76,11 @@ export const apiClient = async (endpoint, options = {}) => {
   try {
     response = await fetch(url, config);
   } catch (networkError) {
+    // Intercept with demo mock store when backend is unreachable
+    const mockData = demoMockStore.handleRequest(endpoint, config);
+    if (mockData !== undefined) {
+      return mockData;
+    }
     throw new ApiError('Unable to connect to BharatStandards API server.', 0, null);
   }
 
@@ -86,19 +93,28 @@ export const apiClient = async (endpoint, options = {}) => {
     data = await response.text().catch(() => null);
   }
 
-  if (!response.ok) {
+  // Check if static CDN returned 404 or HTML catch-all (no backend deployed on this domain)
+  const isHtmlResponse =
+    typeof data === 'string' &&
+    (data.includes('<!DOCTYPE') || data.includes('<html') || data.includes('Page not found'));
+
+  if (!response.ok || isHtmlResponse) {
+    // Try serving from demo mock store if endpoint is missing in production CDN
+    if (response.status === 404 || isHtmlResponse || response.status >= 500) {
+      const mockData = demoMockStore.handleRequest(endpoint, config);
+      if (mockData !== undefined) {
+        return mockData;
+      }
+    }
+
     // 401 Unauthorized handling: token expired or invalid
     if (response.status === 401 && endpoint !== '/auth/login') {
       clearStoredAuth();
     }
 
     let errorMessage;
-    if (typeof data === 'string' && (data.includes('<!DOCTYPE') || data.includes('<html') || data.includes('Page not found'))) {
-      if (response.status === 404) {
-        errorMessage = 'Backend API is currently offline or not deployed on this domain (HTTP 404).';
-      } else {
-        errorMessage = `Backend server returned HTTP ${response.status}.`;
-      }
+    if (isHtmlResponse) {
+      errorMessage = 'Backend API is currently not deployed on this domain. Operating in Demo/Prototype mode.';
     } else {
       errorMessage =
         (data && typeof data === 'object' && (data.detail || data.message)) ||
@@ -107,11 +123,6 @@ export const apiClient = async (endpoint, options = {}) => {
     }
 
     throw new ApiError(errorMessage, response.status, data);
-  }
-
-  // If status is OK (e.g. 200) but content is HTML (SPA catch-all), treat as backend missing (404)
-  if (typeof data === 'string' && (data.includes('<!DOCTYPE') || data.includes('<html') || data.includes('Page not found'))) {
-    throw new ApiError('Backend API is not deployed on this domain. Operating in Demo/Prototype mode.', 404, data);
   }
 
   return data;
