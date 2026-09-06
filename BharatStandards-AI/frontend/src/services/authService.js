@@ -76,13 +76,19 @@ export const authService = {
       }
       return response;
     } catch (apiError) {
-      // If backend is unreachable or 404 (e.g. static hosting on Netlify without backend proxy)
+      // Check if backend API is not available (e.g. running statically on Netlify)
       const isUnreachable =
         apiError.status === 0 ||
         apiError.status === 404 ||
+        apiError.status === 502 ||
+        apiError.status === 503 ||
         (typeof apiError.message === 'string' &&
           (apiError.message.includes('offline') ||
             apiError.message.includes('unreachable') ||
+            apiError.message.includes('not deployed') ||
+            apiError.message.includes('not hosted') ||
+            apiError.message.includes('Demo') ||
+            apiError.message.includes('HTML') ||
             apiError.message.includes('404')));
 
       if (!isUnreachable) {
@@ -138,9 +144,15 @@ export const authService = {
       const isUnreachable =
         apiError.status === 0 ||
         apiError.status === 404 ||
+        apiError.status === 502 ||
+        apiError.status === 503 ||
         (typeof apiError.message === 'string' &&
           (apiError.message.includes('offline') ||
             apiError.message.includes('unreachable') ||
+            apiError.message.includes('not deployed') ||
+            apiError.message.includes('not hosted') ||
+            apiError.message.includes('Demo') ||
+            apiError.message.includes('HTML') ||
             apiError.message.includes('404')));
 
       if (!isUnreachable) {

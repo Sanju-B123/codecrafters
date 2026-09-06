@@ -109,9 +109,9 @@ export const apiClient = async (endpoint, options = {}) => {
     throw new ApiError(errorMessage, response.status, data);
   }
 
-  // If status is OK (e.g. 200) but content is HTML (SPA catch-all), treat as backend missing
-  if (typeof data === 'string' && (data.includes('<!DOCTYPE') || data.includes('<html'))) {
-    throw new ApiError('Backend API endpoint returned static HTML instead of JSON.', 200, data);
+  // If status is OK (e.g. 200) but content is HTML (SPA catch-all), treat as backend missing (404)
+  if (typeof data === 'string' && (data.includes('<!DOCTYPE') || data.includes('<html') || data.includes('Page not found'))) {
+    throw new ApiError('Backend API is not deployed on this domain. Operating in Demo/Prototype mode.', 404, data);
   }
 
   return data;
